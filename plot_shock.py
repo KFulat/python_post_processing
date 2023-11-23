@@ -25,8 +25,7 @@ from visualization_package.plot import FigPlot
 quantities_dict = {**phase_dict, **maps_linear_dict}
 
 matplotlib.pyplot.style.use(
-    "./src/post_processing/python_post_processing/"
-    + "shock_visualization/basic.mplstyle"
+    "shock_visualization/basic.mplstyle"
 )
 
 def prepare_component(comp, step):
