@@ -1,0 +1,80 @@
+# Matplotlib style for  plotting
+# Based on "SciencePlots": https://github.com/garrettj403/SciencePlots
+# Colour schemes taken from Paul Tol's notes: https://personal.sron.nl/~pault/
+
+# Set color cycle: blue red green yellow cyan purple grey black (bright colour cycle from Paul Tol's)
+axes.prop_cycle : cycler('color', ['4477AA', 'EE6677', '228833', 'CCBB44', '66CCEE', 'AA3377', 'BBBBBB'])
+
+font.size : 20
+
+# Set image properties
+image.cmap : jet
+image.aspect : equal
+image.interpolation : none
+image.origin : lower
+
+# Set figure properties
+figure.figsize : 3.7, 2.825
+figure.dpi : 200
+figure.subplot.hspace : 0.25
+figure.subplot.wspace : 0.25
+
+
+# Set x axis
+xtick.direction : in
+xtick.major.size : 7
+xtick.major.width : 1.5
+xtick.minor.size : 4.5
+xtick.minor.width : 1.5
+xtick.minor.visible : True
+xtick.top : True
+xtick.major.pad : 5.0
+
+# Set y axis
+ytick.direction : in
+ytick.major.size : 7
+ytick.major.width : 1.5
+ytick.minor.size : 4.5
+ytick.minor.width : 1.5
+ytick.minor.visible : True
+ytick.right : True
+ytick.major.pad : 5.0
+
+# Set line widths and color
+axes.linewidth : 1.5
+grid.linewidth : 0.75
+lines.linewidth : 1.5
+# lines.color : 'blue'
+
+# Set labelsizes
+axes.labelsize : 20
+xtick.labelsize : 18
+ytick.labelsize : 18
+axes.titlesize : 20
+
+# Remove legend frame
+legend.frameon : False
+legend.borderpad : 0.5
+legend.fontsize : 12
+
+# Show grid
+axes.grid : True
+axes.grid.which : major
+grid.alpha : 0.2
+
+# Set patch properties
+patch.edgecolor: black
+patch.facecolor : white
+
+# Always save as 'tight'
+savefig.bbox : tight
+savefig.pad_inches : 0.05
+
+# Use LaTeX for math formatting
+#text.usetex : True
+#text.latex.preamble : \usepackage{amsmath} \usepackage{amssymb}
+
+# Use serif fonts
+# font.family : serif
+# font.serif : DejaVu Serif
+mathtext.fontset : dejavusans
