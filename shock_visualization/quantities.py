@@ -269,3 +269,57 @@ class Momentum(Density):
     
     def set_ticks(self):
         self.ticks = [self.x_min/C, self.x_max/C, self.y_min/C, self.y_max/C]
+
+class Fourier(QuantityBase):
+    def __init__(
+            self, quantity, data_name, data_norm_const, filter_level,
+            data_extract_const, log=False, norm=True,
+            extract=True
+    ):
+        super().__init__(
+            "", data_name, data_norm_const, filter_level, log, norm
+        )
+        self.quantity = quantity
+        self.data_extract_const = data_extract_const
+        self.extract = extract
+
+    def data_load(self, nstep):
+        self.quantity.data_load(nstep)
+        self.data = self.quantity.data
+    
+    def data_logscale(self):
+        if self.log: self.data = np.ma.log10(self.data)
+
+    def data_normalize(self):
+        if self.norm: self.data /= self.data_norm_const
+
+    def data_extract(self):
+        if self.extract: self.data -= self.data_extract_const
+
+    def set_ticks(self, box_area):
+        self.ticks = np.array(box_area) * RES/LSI
+        if self.plot_params.limits == [(None, None), (None, None)]:
+            self.plot_params.limits[0] = (self.ticks[0], self.ticks[1])
+            self.plot_params.limits[1] = (self.ticks[2], self.ticks[3])
+
+    def add_plot(self, loc):
+        plot = Plot2D(
+            self.data,
+            loc=loc,
+            name=self.plot_params.plot_name,
+            extent=self.ticks,
+            rowspan=1,
+            colspan=self.plot_params.colspan,
+            labels=self.plot_params.labels,
+            lims=self.plot_params.limits,
+            levels=self.plot_params.levels,
+            hide_xlabels=self.plot_params.hide_xlabels,
+            cmap=self.plot_params.cmap,
+            cbar_size="1%",
+            cbar_pad="1%",
+            cbar_extend = "neither",
+            cbar_label = self.plot_params.cbar_label,
+            major_loc=self.plot_params.major_loc,
+            minor_loc=self.plot_params.minor_loc,
+        )
+        self.plot = plot
