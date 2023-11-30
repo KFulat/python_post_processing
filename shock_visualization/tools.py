@@ -6,6 +6,7 @@ import numpy as np
 from numba import njit
 from argparse import ArgumentParser
 from scipy.optimize import curve_fit
+from numpy import fft
 
 def parse_arguments():
     parser = ArgumentParser()
@@ -296,3 +297,39 @@ def Efield_from_charge(q, a=10):
     Ex /= (2.0*np.pi)
     Ey /= (2.0*np.pi)
     return Ex, Ey
+
+def spatial_ft(data_2d, cppu, normalize=True, hanning=True, log=True):
+    """
+    Computes the spatial Fourier transformation of a 2D map in k-space (k limits included)
+    :param data_2d: np.ndarray. Array that will be Fourier transformed. It has to be real data
+    :param cppu: float, int. Cells per Physical Unit. Number of cells that there is in the physical
+    unit we want the FT in.
+    Example: We want the data in Ion Skin Length (LSI), and in the data, 50 cells is one LSI. Thus, cppu=50
+    :param normalize: bool. Whether the FT is normalized or not. Normalize means divide by the size of the array
+    :param hanning: bool. Whether hanning is applied or not. Necessary for non-periodic data boxes
+    :param log: bool. Whether we apply the logarithm to the FT for better visualisation.
+    :return: ft: np.ndarray, ft_extent: list of 2 tuples
+    """
+    data_2d = np.array(data_2d)
+    if hanning:
+        data_2d *= np.sqrt(np.outer(np.hanning(data_2d.shape[0]), np.hanning(data_2d.shape[1])))
+
+    ft = np.fft.fft2(data_2d)
+    ft = np.fft.fftshift(ft)
+    
+    if normalize:
+        ft /= data_2d.size
+    ft = np.abs(ft)**2
+    if log:
+        ft = np.log(ft)
+
+    # k-space in x and y direction
+    kx = fft.fftfreq(data_2d.shape[1], 1/cppu)*2*np.pi
+    ky = fft.fftfreq(data_2d.shape[0], 1/cppu)*2*np.pi
+
+    kx = fft.fftshift(kx)
+    ky = fft.fftshift(ky)
+
+    ft_extent = [np.min(kx), np.max(kx), np.min(ky), np.max(ky)]
+
+    return ft, ft_extent, kx, ky

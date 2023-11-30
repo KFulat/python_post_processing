@@ -52,15 +52,16 @@ if __name__ == "__main__":
         Ni_ft.data = Ni_ft.data[x1:x2, y1:y2]
         Ni_ft.set_ticks([x1, x2, y1, y2])
 
-        Ni_ft.add_plot((0,0))
+        Ni_ft.add_plot((0,1))
 
-        print(type(Ni_ft.plot))
+        Ni_ft.compute_ft()
+        Ni_ft.add_fourier_plot((0,0))
 
         fig = FigPlot(
             f"../plots/dens/fourier/fourier_{nstep}_"
             + f"{int(x1)}_{int(x2)}.png",
-            [Ni_ft.plot],
-            (1,3),
+            [Ni_ft.plot, Ni_ft.plot_ft],
+            (1,4),
         )
 
         fig.save()

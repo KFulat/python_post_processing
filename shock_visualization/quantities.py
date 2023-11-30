@@ -6,7 +6,10 @@ from xmlrpc.client import boolean
 from scipy.ndimage import gaussian_filter
 
 from visualization_package.plot import Plot1D, Plot2D
-from shock_visualization.tools import load_movHR, load_ekin, field_log_new, load_phase, load_Npx, load_mom_distr
+from shock_visualization.tools import (
+    load_movHR, load_ekin, field_log_new, load_phase, load_Npx,
+    load_mom_distr, spatial_ft,
+)
 from shock_visualization.constants import RES, LSI, RES_PHASE, MMX, MMY, C
 
 
@@ -282,10 +285,22 @@ class Fourier(QuantityBase):
         self.quantity = quantity
         self.data_extract_const = data_extract_const
         self.extract = extract
+        self.plot_params_ft = None
 
     def data_load(self, nstep):
         self.quantity.data_load(nstep)
         self.data = self.quantity.data
+
+    def compute_ft(self):
+        ft, ticks, kx, ky = spatial_ft(self.data, 5, normalize=True,
+                                       hanning=True, log=True)
+        self.data_ft = ft
+        self.ticks_ft = ticks
+        self.kx = kx
+        self.ky = ky
+        if self.plot_params_ft.limits == [(None, None), (None, None)]:
+            self.plot_params_ft.limits[0] = (self.ticks_ft[0], self.ticks_ft[1])
+            self.plot_params_ft.limits[1] = (self.ticks_ft[2], self.ticks_ft[3])
     
     def data_logscale(self):
         if self.log: self.data = np.ma.log10(self.data)
@@ -323,3 +338,25 @@ class Fourier(QuantityBase):
             minor_loc=self.plot_params.minor_loc,
         )
         self.plot = plot
+
+    def add_fourier_plot(self, loc):
+        plot = Plot2D(
+            self.data_ft,
+            loc=loc,
+            name=self.plot_params_ft.plot_name,
+            extent=self.ticks_ft,
+            rowspan=1,
+            colspan=self.plot_params_ft.colspan,
+            labels=self.plot_params_ft.labels,
+            lims=self.plot_params_ft.limits,
+            levels=self.plot_params_ft.levels,
+            hide_xlabels=self.plot_params_ft.hide_xlabels,
+            cmap=self.plot_params_ft.cmap,
+            cbar_size="1%",
+            cbar_pad="1%",
+            cbar_extend = "neither",
+            cbar_label = self.plot_params_ft.cbar_label,
+            major_loc=self.plot_params_ft.major_loc,
+            minor_loc=self.plot_params_ft.minor_loc,
+        )
+        self.plot_ft = plot
