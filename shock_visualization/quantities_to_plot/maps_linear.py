@@ -7,8 +7,8 @@ from shock_visualization.quantities import Density, Field, PlotParams
 
 filter_sigma = 0.5
 
-Ni = Density(PATH_TO_RESULT, "densiresR", N0, filter_sigma, 0.0, False, True)
-Ne = Density(PATH_TO_RESULT, "denseresR", N0, filter_sigma, 0.0, False, True)
+Ni = Density(PATH_TO_RESULT, "densiresR", N0, filter_sigma, 0.5, False, True)
+Ne = Density(PATH_TO_RESULT, "denseresR", N0, filter_sigma, 0.5, False, True)
 Bx = Field(PATH_TO_RESULT, "bxres", b0, filter_sigma, B0[0], False, True, True)
 By = Field(PATH_TO_RESULT, "byres", b0, filter_sigma, B0[1], False, True, True)
 Bz = Field(PATH_TO_RESULT, "bzres", b0, filter_sigma, B0[2], False, True, True)
@@ -22,7 +22,7 @@ labels = [r"$x/\lambda_{si}$", r"$y/\lambda_{si}$"]
 major_loc = (10.0,2.0)
 minor_loc = (1.0,1.0)
 colspan = 20
-fig_name = "step_"
+fig_name = "step"
 cmap = "turbo"
 
 # Initialize plot parameters for density and field maps
