@@ -1,8 +1,8 @@
 """Shock simulation constants"""
 import numpy as np
 
-PATH_TO_RESULT = "./result"
-PATH_TO_PLOT = "./plots"
+PATH_TO_RESULT = "../result"
+PATH_TO_PLOT = "../plots"
 STEP_INIT = 0
 
 C = 0.5
@@ -34,6 +34,6 @@ E0 = -V0*np.array([0.0, -B0[2], B0[1]])
 DIGITS = 6
 WPE = 0.025
 
-MMX = int(12*96 // RES)
-MMY = int(12*96 // RES)
+MMX = int(12*192 // RES)
+MMY = int(12*192 // RES)
 
