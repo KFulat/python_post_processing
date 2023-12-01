@@ -289,12 +289,13 @@ class Fourier(QuantityBase):
         self.extract = extract
         self.plot_params_ft = None
 
-    def data_load(self, nstep):
+    def data_load(self, nstep, x1,x2,y1,y2):
         self.quantity.data_load(nstep)
         self.data = self.quantity.data
+        self.data = self.data[y1:y2, x1:x2]
 
     def compute_ft(self):
-        self.data -= np.mean(self.data)
+        # self.data -= np.mean(self.data)
         if self.filter_level:
             data_filtered = gaussian_filter(self.data ,
                                             self.filter_level)

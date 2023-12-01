@@ -333,3 +333,11 @@ def spatial_ft(data_2d, cppu, normalize=True, hanning=True, log=True):
     ft_extent = [np.min(kx), np.max(kx), np.min(ky), np.max(ky)]
 
     return ft, ft_extent, kx, ky
+
+def simbox_area(x1,x2,y1,y2,input_unit,res_factor):
+    """Are of the simulation box converted from input to resized unit"""
+    x1 = int( x1 * input_unit/res_factor)
+    x2 = int( x2 * input_unit/res_factor)
+    y1 = int( y1 * input_unit/res_factor)
+    y2 = int( y2 * input_unit/res_factor)
+    return x1, x2, y1, y2

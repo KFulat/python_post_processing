@@ -11,6 +11,7 @@ from visualization_package.plot import FigPlot, Plot2D
 from shock_visualization.tools import (
     format_step_string,
     parse_arguments,
+    simbox_area,
 )
 from shock_visualization.quantities_to_plot.fourier_dens import (
     fourier_maps_dict
@@ -32,24 +33,15 @@ if __name__ == "__main__":
         # x_sh = shock_position_linear(nstep)
         # print(f"shock position: {x_sh}")
 
-        def simbox_area(x1,x2,y1,y2,input_unit,res_factor):
-            """Are of the simulation box converted from input to resized unit"""
-            x1 = int( x1 * input_unit/res_factor)
-            x2 = int( x2 * input_unit/res_factor)
-            x1 = int( y1 * input_unit/res_factor)
-            y2 = int( y2 * input_unit/res_factor)
-            return x1, x2, y1, y2
-
-        a = 0
-        x1, x2, y1, y2 = simbox_area(a,a+21.52,0,11.52,LSI,RES)
+        a = 0.0
+        x1, x2, y1, y2 = simbox_area(a,a+11.52,0,11.52,LSI,RES)
 
         Ni = Density(PATH_TO_RESULT, "densiresR", N0, 0.0, 0.0)
         Ni.data_load(nstep)
 
         Ni_ft = quantities_dict[args.quantities[0]][0]
-        Ni_ft.data_load(nstep)
+        Ni_ft.data_load(nstep, x1, x2, y1, y2)
         Ni_ft.data_normalize()
-        Ni_ft.data = Ni_ft.data[x1:x2, y1:y2]
         Ni_ft.set_ticks([x1, x2, y1, y2])
 
         Ni_ft.add_plot((0,1))
@@ -59,7 +51,7 @@ if __name__ == "__main__":
 
         fig = FigPlot(
             f"../plots/dens/fourier/fourier_{nstep}_"
-            + f"{int(x1)}_{int(x2)}.png",
+            + f"{int(x1*RES/LSI)}_{int(x2*RES/LSI)}.png",
             [Ni_ft.plot, Ni_ft.plot_ft],
             (1,4),
         )
