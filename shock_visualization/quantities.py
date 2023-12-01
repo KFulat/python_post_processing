@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from matplotlib.colors import Colormap
 from xmlrpc.client import boolean
-from scipy.ndimage import gaussian_filter
+from scipy.ndimage import gaussian_filter, uniform_filter
 
 from visualization_package.plot import Plot1D, Plot2D
 from shock_visualization.tools import (
@@ -278,7 +278,7 @@ class Momentum(Density):
 class Fourier(QuantityBase):
     def __init__(
             self, quantity, data_name, data_norm_const, filter_level,
-            data_extract_const, log=False, norm=True,
+            data_extract_const, uniform_filter, log=False, norm=True,
             extract=True
     ):
         super().__init__(
@@ -288,14 +288,18 @@ class Fourier(QuantityBase):
         self.data_extract_const = data_extract_const
         self.extract = extract
         self.plot_params_ft = None
+        self.uniform_filter = uniform_filter
 
     def data_load(self, nstep, x1,x2,y1,y2):
         self.quantity.data_load(nstep)
         self.data = self.quantity.data
         self.data = self.data[y1:y2, x1:x2]
 
+    def data_filter(self):
+        self.data_ft = uniform_filter(self.data_ft, self.uniform_filter)
+
     def compute_ft(self):
-        # self.data -= np.mean(self.data)
+        self.data -= np.mean(self.data)
         if self.filter_level:
             data_filtered = gaussian_filter(self.data ,
                                             self.filter_level)

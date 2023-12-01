@@ -46,8 +46,8 @@ cmap_turb = LinearSegmentedColormap.from_list(
 #                     middle(np.linspace(0, 1, 2*256-a)),
 #                         bottom(np.linspace(0, 1, 2*256+a))))
 # cmap_turb = ListedColormap(newcolors)
-magma = cm.get_cmap('magma', 256)
-cmap_ft = magma(np.linspace(0, 1, 256))
+turbo = cm.get_cmap('turbo', 256)
+cmap_ft = turbo(np.linspace(0, 1, 256))
 white = np.array([256/256, 256/256, 256/256, 1])
 cmap_ft[:10] = white
 cmap_ft = ListedColormap(cmap_ft)

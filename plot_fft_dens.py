@@ -30,7 +30,7 @@ if __name__ == "__main__":
         # x_sh = shock_position_linear(nstep)
         # print(f"shock position: {x_sh}")
 
-        a = 0.0
+        a = 10.0
         x1, x2, y1, y2 = simbox_area(a,a+11.52,0,11.52,LSI,RES)
 
         Ni_ft = quantities_dict[args.quantities[0]][0]
@@ -41,6 +41,7 @@ if __name__ == "__main__":
         Ni_ft.add_plot((0,1))
 
         Ni_ft.compute_ft()
+        Ni_ft.data_filter()
         Ni_ft.add_fourier_plot((0,0))
 
         fig = FigPlot(
@@ -48,6 +49,9 @@ if __name__ == "__main__":
             + f"{int(x1*RES/LSI)}_{int(x2*RES/LSI)}.png",
             [Ni_ft.plot, Ni_ft.plot_ft],
             (1,4),
+            wspace=0.1,
+            size=(13,5),
+            dpi=200,
         )
 
         fig.save()
