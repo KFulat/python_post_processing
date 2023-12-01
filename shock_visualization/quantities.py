@@ -305,7 +305,10 @@ class Fourier(QuantityBase):
                                             self.filter_level)
             self.data -= data_filtered
         ft, ticks, kx, ky = spatial_ft(self.data, 5, normalize=True,
-                                       hanning=False, log=True)
+                                       hanning=False, log=False)
+        
+        # print(np.sum(self.data**2)/self.data.size)
+        # print(np.sum(ft))
         # chose specific region of the tranform
         n = ft.shape[0]
         m = ft.shape[1]

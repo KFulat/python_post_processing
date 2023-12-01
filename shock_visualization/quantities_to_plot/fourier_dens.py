@@ -40,7 +40,7 @@ ft_plot_params = PlotParams(
     major_loc = (None, None),
     minor_loc = (None, None),
     levels = (-40, -38),
-    cbar_label = r"$dP(N_i)/dk$",
+    cbar_label = r"$dP(\delta N_i/N_0)/dk$",
     cbar_size = "10%",
     cbar_pad = "6%",
 )
