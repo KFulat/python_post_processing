@@ -2,8 +2,6 @@
 
 import numpy as np
 import matplotlib
-from scipy import fft, interpolate
-import matplotlib.pyplot as plt
 from scipy.ndimage import gaussian_filter, uniform_filter
 
 from visualization_package.plot import FigPlot, Plot2D
@@ -16,8 +14,7 @@ from shock_visualization.tools import (
 from shock_visualization.quantities_to_plot.fourier_dens import (
     fourier_maps_dict
 )
-from shock_visualization.constants import LSI, RES, PATH_TO_RESULT, N0, PATH_TO_PLOT
-from shock_visualization.quantities import Density, Fourier, PlotParams
+from shock_visualization.constants import LSI, RES, N0
 
 matplotlib.pyplot.style.use(
     "shock_visualization/basic.mplstyle"
@@ -35,9 +32,6 @@ if __name__ == "__main__":
 
         a = 0.0
         x1, x2, y1, y2 = simbox_area(a,a+11.52,0,11.52,LSI,RES)
-
-        Ni = Density(PATH_TO_RESULT, "densiresR", N0, 0.0, 0.0)
-        Ni.data_load(nstep)
 
         Ni_ft = quantities_dict[args.quantities[0]][0]
         Ni_ft.data_load(nstep, x1, x2, y1, y2)
