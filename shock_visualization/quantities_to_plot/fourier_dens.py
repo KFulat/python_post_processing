@@ -4,7 +4,7 @@ from shock_visualization.constants import (
 from shock_visualization.quantities import Density, Fourier, PlotParams
 
 Ni = Density(PATH_TO_RESULT, "densiresR", N0, 0.0, 0.0)
-Ni_ft = Fourier(Ni, "fourier", N0, 0.0, N0)
+Ni_ft = Fourier(Ni, "fourier", N0, 0, N0)
 
 plot_params = PlotParams(
     colspan = 3,
@@ -20,6 +20,8 @@ plot_params = PlotParams(
     minor_loc = (1.0,1.0),
     levels = (1.0-0.05, 1.0+0.05),
     cbar_label = "",
+    cbar_size = "2%",
+    cbar_pad = "2%",
 )
 
 ft_plot_params = PlotParams(
@@ -36,6 +38,8 @@ ft_plot_params = PlotParams(
     minor_loc = (None, None),
     levels = (None, None),
     cbar_label = r"$dP(N_i)/dk$",
+    cbar_size = "10%",
+    cbar_pad = "6%",
 )
 
 Ni_ft.plot_params = plot_params

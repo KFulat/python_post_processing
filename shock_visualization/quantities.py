@@ -58,6 +58,8 @@ class PlotParams:
     minor_loc: tuple
     levels: tuple
     cbar_label: str
+    cbar_size: str
+    cbar_pad: str
 
 @dataclass
 class PlotParams1D:
@@ -292,18 +294,29 @@ class Fourier(QuantityBase):
         self.data = self.quantity.data
 
     def compute_ft(self):
+        self.data -= np.mean(self.data)
+        if self.filter_level:
+            data_filtered = gaussian_filter(self.data ,
+                                            self.filter_level)
+            self.data -= data_filtered
         ft, ticks, kx, ky = spatial_ft(self.data, 5, normalize=True,
-                                       hanning=True, log=True)
+                                       hanning=False, log=True)
+        # chose specific region of the tranform
+        n = ft.shape[0]
+        m = ft.shape[1]
+        ft = 2.0 * ft[:, m//2+1:] # multiplied by two to maintain norm
         self.data_ft = ft
+        kx_abs = kx[kx>0.0]
+        ticks[0] = np.min(kx_abs)
         self.ticks_ft = ticks
-        self.kx = kx
+        self.kx = kx_abs
         self.ky = ky
         if self.plot_params_ft.limits == [(None, None), (None, None)]:
             self.plot_params_ft.limits[0] = (self.ticks_ft[0], self.ticks_ft[1])
             self.plot_params_ft.limits[1] = (self.ticks_ft[2], self.ticks_ft[3])
     
     def data_logscale(self):
-        if self.log: self.data = np.ma.log10(self.data)
+        if self.log: self.data_ft = np.ma.log10(self.data_ft)
 
     def data_normalize(self):
         if self.norm: self.data /= self.data_norm_const
@@ -330,8 +343,8 @@ class Fourier(QuantityBase):
             levels=self.plot_params.levels,
             hide_xlabels=self.plot_params.hide_xlabels,
             cmap=self.plot_params.cmap,
-            cbar_size="1%",
-            cbar_pad="1%",
+            cbar_size=self.plot_params.cbar_size,
+            cbar_pad=self.plot_params.cbar_pad,
             cbar_extend = "neither",
             cbar_label = self.plot_params.cbar_label,
             major_loc=self.plot_params.major_loc,
@@ -352,8 +365,8 @@ class Fourier(QuantityBase):
             levels=self.plot_params_ft.levels,
             hide_xlabels=self.plot_params_ft.hide_xlabels,
             cmap=self.plot_params_ft.cmap,
-            cbar_size="1%",
-            cbar_pad="1%",
+            cbar_size=self.plot_params_ft.cbar_size,
+            cbar_pad=self.plot_params_ft.cbar_pad,
             cbar_extend = "neither",
             cbar_label = self.plot_params_ft.cbar_label,
             major_loc=self.plot_params_ft.major_loc,
