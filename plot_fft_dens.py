@@ -1,4 +1,4 @@
-"""Module for plotting basic shock quantities."""
+"""Module for plotting basic fourier spectra."""
 
 import numpy as np
 import matplotlib
@@ -8,11 +8,14 @@ from visualization_package.plot import FigPlot, Plot2D
 
 from shock_visualization.tools import (
     format_step_string,
-    parse_arguments,
+    parse_arguments_fourier,
     simbox_area,
 )
 from shock_visualization.quantities_to_plot.fourier_dens import (
     fourier_maps_dict
+)
+from shock_visualization.quantities_to_plot.fourier_bfield import (
+    fourier_bfield_dict
 )
 from shock_visualization.constants import LSI, RES, N0
 
@@ -20,34 +23,52 @@ matplotlib.pyplot.style.use(
     "shock_visualization/basic.mplstyle"
 )
 
-quantities_dict = {**fourier_maps_dict}
+quantities_dict = {**fourier_maps_dict, **fourier_bfield_dict}
 
 if __name__ == "__main__":
-    args = parse_arguments()
+    args = parse_arguments_fourier()
 
     for nstep in range(args.start, args.stop + args.step, args.step):
         nstep_string = format_step_string(nstep)
         # x_sh = shock_position_linear(nstep)
         # print(f"shock position: {x_sh}")
 
-        a = 10.0
-        x1, x2, y1, y2 = simbox_area(a,a+11.52,0,11.52,LSI,RES)
+        if args.xlimits and args.ylimits:
+            x1, x2, y1, y2 = simbox_area(
+                args.xlimits[0],args.xlimits[1],args.ylimits[0],
+                args.ylimits[1],LSI,RES
+            )
+        else:
+            a = 10.0
+            x1, x2, y1, y2 = simbox_area(a,a+11.52,0,11.52,LSI,RES)
 
-        Ni_ft = quantities_dict[args.quantities[0]][0]
-        Ni_ft.data_load(nstep, x1, x2, y1, y2)
-        Ni_ft.data_normalize()
-        Ni_ft.set_ticks([x1, x2, y1, y2])
+        quantity = quantities_dict[args.quantities[0]][0]
+        quantity.data_load(nstep, x1, x2, y1, y2)
+        quantity.data_normalize()
+        quantity.set_ticks([x1, x2, y1, y2])
 
-        Ni_ft.add_plot((0,1))
+        quantity.add_plot((0,1))
 
-        Ni_ft.compute_ft()
-        Ni_ft.data_filter()
-        Ni_ft.add_fourier_plot((0,0))
+        quantity.compute_ft()
+        quantity.data_filter()
+        quantity.add_fourier_plot((0,0))
+
+        if args.subdirectory:
+            fig_path = (
+                f"{quantity.plot_params.plot_path}/"
+                + f"{args.subdirectory}/"
+            )
+        else:
+            fig_path = f"{quantity.plot_params.plot_path}/"
+        fig_path = (
+            fig_path
+            + f"{quantity.plot_params.fig_name}_{nstep_string}"
+            + f".{args.filetype}"
+        )
 
         fig = FigPlot(
-            f"../plots/dens/fourier/fourier_{nstep}_"
-            + f"{int(x1*RES/LSI)}_{int(x2*RES/LSI)}.png",
-            [Ni_ft.plot, Ni_ft.plot_ft],
+            fig_path,
+            [quantity.plot, quantity.plot_ft],
             (1,4),
             wspace=0.1,
             size=(13,5),

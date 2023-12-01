@@ -76,6 +76,55 @@ def parse_arguments():
 
     return args
 
+def parse_arguments_fourier():
+    parser = ArgumentParser()
+
+    parser.add_argument("start", type=int)
+    parser.add_argument("stop", type=int)
+    parser.add_argument("step", type=int)
+
+    parser.add_argument("quantities", nargs="*")
+
+    parser.add_argument(
+        "--filetype",
+        choices=["png", "pdf", "svg"],
+        default="png"
+    )
+
+    parser.add_argument("--subdirectory")
+    
+    def str_to_tuple_float(str):
+        list_of_str = str.split(",")
+        list_of_int = [float(s) for s in list_of_str]
+        return tuple(list_of_int)
+
+    parser.add_argument(
+        "--xlimits",
+        type=str_to_tuple_float,
+        metavar=("XMIN,XMAX"),
+        help="take xmin and xmax seperated by a comma"
+    )
+
+    parser.add_argument(
+        "--ylimits",
+        type=str_to_tuple_float,
+        metavar=("YMIN,YMAX"),
+        help="take ymin and ymax seperated by a comma"
+    )
+
+    parser.add_argument(
+        "--levels",
+        type=str_to_tuple_float,
+        metavar=("MIN,MAX"),
+        help="take min and max values for the colormap seperated by a comma"
+    )
+
+    parser.add_argument("--dpi", type=int)
+
+    args = parser.parse_args()
+
+    return args
+
 def func_linear(x, a, b):
     return a*x+b
 

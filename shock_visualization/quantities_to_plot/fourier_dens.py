@@ -5,7 +5,7 @@ from shock_visualization.quantities import Density, Fourier, PlotParams
 from shock_visualization.mycolormaps import cmap_ft
 
 Ni = Density(PATH_TO_RESULT, "densiresR", N0, 0.0, 0.0)
-Ni_ft = Fourier(Ni, "fourier", N0, 0, N0, 6)
+Ni_ft = Fourier(Ni, "fourier", N0, 0, 0.0, 6)
 
 plot_params = PlotParams(
     colspan = 3,
