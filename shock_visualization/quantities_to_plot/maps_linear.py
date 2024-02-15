@@ -7,8 +7,8 @@ from shock_visualization.quantities import Density, Field, PlotParams
 
 filter_sigma = 0.5
 
-Ni = Density(PATH_TO_RESULT, "densiresR", N0, filter_sigma, 0.5, False, True)
-Ne = Density(PATH_TO_RESULT, "denseresR", N0, filter_sigma, 0.5, False, True)
+Ni = Density(PATH_TO_RESULT, "densiresR", N0, filter_sigma, 0.0, False, True, False)
+Ne = Density(PATH_TO_RESULT, "denseresR", N0, filter_sigma, 0.0, False, True, False)
 Bx = Field(PATH_TO_RESULT, "bxres", b0, filter_sigma, B0[0], False, True, True)
 By = Field(PATH_TO_RESULT, "byres", b0, filter_sigma, B0[1], False, True, True)
 Bz = Field(PATH_TO_RESULT, "bzres", b0, filter_sigma, B0[2], False, True, True)
