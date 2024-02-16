@@ -24,6 +24,8 @@ minor_loc = (1.0,1.0)
 colspan = 20
 fig_name = "step_log"
 cmap = "turbo"
+cbar_size = "2%"
+cbar_pad = "2%"
 
 # Initialize plot parameters for density and field maps
 dens_plot_params = PlotParams(
@@ -40,6 +42,8 @@ dens_plot_params = PlotParams(
     minor_loc = minor_loc,
     levels = (-0.1, 1.2),
     cbar_label = "",
+    cbar_size=cbar_size,
+    cbar_pad=cbar_pad,
 )
 
 bfield_plot_params = PlotParams(
@@ -56,6 +60,8 @@ bfield_plot_params = PlotParams(
     minor_loc = minor_loc,
     levels = (-4.5, 4.5),
     cbar_label = "",
+    cbar_size=cbar_size,
+    cbar_pad=cbar_pad,
 )
 
 efield_plot_params = PlotParams(
@@ -72,6 +78,8 @@ efield_plot_params = PlotParams(
     minor_loc = minor_loc,
     levels = (-4.0, 4.0),
     cbar_label = "",
+    cbar_size=cbar_size,
+    cbar_pad=cbar_pad,
 )
 
 # Attach plot parameters to quantities
