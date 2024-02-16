@@ -268,6 +268,26 @@ class Velocity(Field):
         data = gaussian_filter(data, sigma=self.filter_level)
         self.data = data        
 
+class CurrentTotal(Field):
+    def __init__(
+            self, data_norm_const, filter_level,
+            data_extract_const, curr_ion, curr_ele,
+            log=False, norm=False, extract=False
+    ):
+        super().__init__(
+            "", "", data_norm_const, filter_level,
+            data_extract_const, log, norm, extract
+        )
+        self.curr_ion = curr_ion
+        self.curr_ele = curr_ele
+
+    def data_load(self, nstep):
+        self.curr_ion.data_load(nstep)
+        self.curr_ele.data_load(nstep)
+        data = self.curr_ion.data - self.curr_ele.data
+        data = gaussian_filter(data, sigma=self.filter_level)
+        self.data = data
+
 class Phase(Density):
     def __init__(self, data_path, data_name, data_norm_const, filter_level, log=False, norm=False):
         super().__init__(data_path, data_name, data_norm_const, filter_level, log, norm)
