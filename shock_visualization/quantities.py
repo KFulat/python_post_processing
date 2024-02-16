@@ -86,17 +86,24 @@ class Spectrum(QuantityBase):
 
     def data_load(self, nstep, xL, xR):
         self.data = []
-        group = load_ekin(nstep, self.data_name, self.data_path)
-        attrs = group[self.data_name]['attrs']
-        bin_min = attrs['bmin']
-        bin_max = attrs['bmax']
-        bin_num = attrs['bnum']
+        data = load_ekin(nstep, self.data_name, self.data_path)
+        # attrs = group[self.data_name]['attrs']
+        # bin_min = attrs['bmin']
+        # bin_max = attrs['bmax']
+        # bin_num = attrs['bnum']
+        bin_min = 0.00001
+        bin_max = 100.0
+        bin_num = 500
         bin_delta = np.log10(bin_max / bin_min) / bin_num
         print(bin_min, bin_max, bin_num, bin_delta)
-        data = group[self.data_name][self.data_name].T
-        x_min = attrs['xmin']
-        x_max = attrs['xmax']
-        x_num = attrs['xnum']
+        # data = group[self.data_name][self.data_name].T
+        data = data.T
+        # x_min = attrs['xmin']
+        # x_max = attrs['xmax']
+        # x_num = attrs['xnum']
+        x_min = 0
+        x_max = 960
+        x_num = 10
         a = int(xL*LSI / x_max * x_num)
         b = int(xR*LSI / x_max * x_num)
         data = data[a:b,:,:]
@@ -225,8 +232,8 @@ class Density(QuantityBase):
             levels=self.plot_params.levels,
             hide_xlabels=self.plot_params.hide_xlabels,
             cmap=self.plot_params.cmap,
-            cbar_size="1%",
-            cbar_pad="1%",
+            cbar_size=self.plot_params.cbar_size,
+            cbar_pad=self.plot_params.cbar_pad,
             cbar_extend = "neither",
             cbar_label = self.plot_params.cbar_label,
             major_loc=self.plot_params.major_loc,
@@ -240,6 +247,26 @@ class Field(Density):
 
     def data_logscale(self):
         if self.log: self.data = field_log_new(self.data, 0.01)
+
+class Velocity(Field):
+    def __init__(
+            self, data_norm_const, filter_level,
+            data_extract_const, curr, dens,
+            log=False, norm=False, extract=False
+    ):
+        super().__init__(
+            "", "", data_norm_const, filter_level,
+            data_extract_const, log, norm, extract
+        )
+        self.curr = curr
+        self.dens = dens
+
+    def data_load(self, nstep):
+        self.curr.data_load(nstep)
+        self.dens.data_load(nstep)
+        data = self.curr.data / self.dens.data
+        data = gaussian_filter(data, sigma=self.filter_level)
+        self.data = data        
 
 class Phase(Density):
     def __init__(self, data_path, data_name, data_norm_const, filter_level, log=False, norm=False):
@@ -305,7 +332,7 @@ class Fourier(QuantityBase):
                                             self.filter_level)
             self.data -= data_filtered
         ft, ticks, kx, ky = spatial_ft(self.data, 5, normalize=True,
-                                       hanning=False, log=False)
+                                       hanning=False, log=True)
         
         # print(np.sum(self.data**2)/self.data.size)
         # print(np.sum(ft))
