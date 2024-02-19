@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib
 from scipy.ndimage import gaussian_filter, uniform_filter
 
-from visualization_package.plot import FigPlot, Plot2D
+from visualization_package.plot import FigPlot, Plot2D, Plot1D
 
 from shock_visualization.tools import (
     format_step_string,
@@ -52,6 +52,175 @@ if __name__ == "__main__":
         quantity.compute_ft()
         quantity.data_filter()
         quantity.add_fourier_plot((0,0))
+
+
+        # A = np.array([[3,2,1],
+        #               [2,2,1],
+        #               [5,1,1]])
+        # sumx = np.sum(A,axis=0)
+        # kx = np.array([1,2,3])
+        # k2D = np.meshgrid(kx,kx)
+        # knorm = np.sqrt(k2D[0]**2)
+        # print(k2D[0])
+        # print(knorm)
+        # knorm = knorm.flatten()
+        # A = A.flatten()
+        # print(A)
+        # print(knorm)
+        # dkx = kx[1]-kx[0]
+        # kbins = np.arange(kx[0]-dkx/2, kx[-1]+3*dkx/2, dkx)
+        # print(kbins)
+        # kvals = np.array(kx)
+        # print(kvals)
+
+        # import scipy.stats as stats
+
+        # Abins, _, _ = stats.binned_statistic(knorm, A,
+        #                                     statistic = "sum",
+        #                                     bins = kbins)
+        # print(Abins)
+        # print(sumx)
+        # exit()
+
+        print(quantity.data_ft.shape)
+        Nx = quantity.data_ft.shape[0]
+        ft_x = np.sum(quantity.data_ft, axis=0)
+        # ft_x[Nx//2:] *= 2.0
+        A = np.array(ft_x[Nx//2:])
+        B = np.array(np.flip(ft_x[1:Nx//2]))
+        C = np.array(ft_x[Nx//2+1:] + np.flip(ft_x[1:Nx//2]))
+        print(A[:4])
+        print(B[:4])
+        print(C[:4])
+        print(A[:4]*2.0)
+        # exit()
+        ft_x[Nx//2+1:] = ft_x[Nx//2+1:] + np.flip(ft_x[1:Nx//2])
+        # print(A.shape)
+        # print(B.shape)
+        # ft_x = ft_x[Nx//2:]
+        # ft_x = np.sum(quantity.data_ft, axis=0)
+        kx = quantity.kx
+        ky = quantity.ky
+        print(kx[Nx//2:])
+        print(kx[1:Nx//2+1])
+        # kx = kx - np.abs(kx[3]-kx[2])/2.0
+        # kx = np.fft.fftfreq(Nx) * Nx
+        # ky = np.fft.fftfreq(Nx) * Nx
+        # kx = np.where(kx==0.0, 1e-10, kx)
+        # ky = np.where(ky==0.0, 1e-10, ky)
+        # kx = np.array([1,2,3])
+        # ky = np.array([1,2,3])
+        k2D = np.meshgrid(kx,kx)
+        # knorm = np.sqrt(k2D[0]**2 + k2D[1]**2)
+        knorm = np.sqrt(k2D[0]**2)
+        # knorm = np.abs(k2D[0])
+        # knorm = k2D[0]
+        print(kx)
+        print(knorm.min())
+        print(knorm.max())
+
+        knorm = knorm.flatten()
+        ft = quantity.data_ft.flatten()
+
+        # print(knorm.min())
+
+        # kbins = np.linspace(knorm.min(), knorm.max(), Nx)
+        # kx = kx[Nx//2:]
+        dkx = kx[1]-kx[0]
+        kbins = np.arange(kx[0]-dkx/2, knorm.max()+dkx, dkx)
+        # kbins = np.arange(kx[0]-dkx, knorm.max()+dkx, dkx)
+        # kbins = np.arange(kx[0], kx[-1]+2*dkx, dkx)
+        # kbins = np.arange(kx[0]-0.99*dkx, kx[-1]+dkx, dkx)
+        # kbins = np.insert(kx,0,0.0)
+        print(kbins)
+        kvals = 0.5*(kbins[1:]+kbins[:-1])
+        # kvals = np.array(kx)
+        print(kvals)
+
+        import scipy.stats as stats
+
+        Abins, _, _ = stats.binned_statistic(knorm, ft,
+                                            statistic = "sum",
+                                            bins = kbins)
+        # print(kx)
+        # print(bin_edges)
+        # kvals = 0.5*(bin_edges[1:]+bin_edges[:-1])
+        print(kvals.shape)
+        print(Abins.shape)
+        print(ft_x.shape)
+
+        print(Abins.min())
+        print(Abins.max())
+        print(kvals.min())
+        print(kvals.max())
+
+        print(np.sum(Abins))
+        print(np.sum(ft))
+        print(np.sum(ft_x))
+
+        print(Abins[0])
+
+        # Abins *= np.pi * (kbins[1:]**2 - kbins[:-1]**2)
+        # print(Abins)
+        # kx = np.log10(kx)
+        # print(ft_x.shape)
+        # print(quantity.kx.shape)
+
+
+        # indx1 = 3
+        # indx2 = 6
+        # xdata = kvals[indx1:indx2]
+        # ydata = Abins[indx1:indx2]
+
+        # # print(xdata)
+
+        # from scipy.optimize import curve_fit
+        # def power_func(E, a, b):
+        #     E = np.array(E)
+        #     f = a * E + np.log(b)
+        #     return f
+        
+        # popt, pcov = curve_fit(power_func, np.log(xdata), np.log(ydata))
+        # perr = np.sqrt(np.diag(pcov))
+        # print(f"Curvefit fitted parameters: {popt}")
+        # print(f"Curvefit err fitted parameters: {perr}")
+
+        # yfit = popt[1]*kvals**popt[0]
+
+        # print(kvals)
+
+        plotx = Plot1D(
+            [ft_x, Abins[:-1]],
+            # [ft_x, yfit],
+            kvals[:-1],
+            loc=(0,0),
+            # lims=[(1e-1,2*1e0),(8*1e-6,1e-1)],
+            # lims=[(1*1e-2,2*1e0),(5*1e-8,1e-2)],
+            lims=[(-1,1),(1e-6,1e-2)],
+            # lims=[(None,None),(None,None)],
+            labels=[r"$k_x\lambda_{se}$",
+                    "log({})".format(
+                        r"$dP(N_{})/dk_x$".format("i"),
+                    )],
+            # major_loc=(0.5,None),
+            )
+        
+        fig = FigPlot(
+            f"../plots/dens/fourier/fourier_{nstep}_1D.png",
+            [plotx],
+            (1,1),
+            size=(5,4),
+            dpi=300,
+            hspace=0.4
+        )
+    
+        # fig.plots[0].axis.set_xscale("log", base=10)
+        fig.plots[0].axis.set_yscale("log", base=10)
+
+
+        fig.save()
+
+        exit()
 
         if args.subdirectory:
             fig_path = (
