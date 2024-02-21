@@ -204,10 +204,11 @@ def load_mom_distr(step, data_name, path_to_result):
     return group
 
 def load_ekin(step, data_name, path_to_result):
-    step_digits = format_step_string(step)
-    file_path = f"{path_to_result}/ekin_{step_digits}.h5"
-    group = load_data_from_h5file(file_path, data_name)
-    return group
+    file_path = f"{path_to_result}/spectra_up.h5"
+    group_name = f"Step#{step}"
+    group = load_data_from_h5file(file_path, group_name)
+    data = group[group_name][data_name]
+    return data
 
 def load_phase(step, data_name, path_to_result):
     step_digits = format_step_string(step)
@@ -370,7 +371,7 @@ def spatial_ft(data_2d, cppu, normalize=True, hanning=True, log=True):
         ft /= data_2d.size
     ft = np.abs(ft)**2
     if log:
-        ft = np.log(ft)
+        ft = np.log10(ft)
 
     # k-space in x and y direction
     kx = fft.fftfreq(data_2d.shape[1], 1/cppu)*2*np.pi
@@ -390,3 +391,57 @@ def simbox_area(x1,x2,y1,y2,input_unit,res_factor):
     y1 = int( y1 * input_unit/res_factor)
     y2 = int( y2 * input_unit/res_factor)
     return x1, x2, y1, y2
+
+@njit
+def dFdy_back(F):
+    rows = F.shape[0]
+    cols = F.shape[1]
+    dFdy = np.zeros((rows,cols))
+    for j in range(cols):
+        for i in range(1,rows-1):
+            dFdy[i][j] = (F[i][j] - F[i-1][j])
+    return dFdy   
+
+@njit
+def dFdx_back(F):
+    rows = F.shape[0]
+    cols = F.shape[1]
+    dFdy = np.zeros((rows,cols))
+    for j in range(1,cols-1):
+        for i in range(rows):
+            dFdy[i][j] = (F[i][j] - F[i][j-1])
+    return dFdy
+
+@njit
+def dFdy_mid(F):
+    rows = F.shape[0]
+    cols = F.shape[1]
+    dFdy = np.zeros((rows,cols))
+    for j in range(cols):
+        for i in range(1,rows-1):
+            dFdy[i][j] = 0.5*(F[i+1][j] - F[i-1][j])
+    return dFdy   
+
+@njit
+def dFdx_mid(F):
+    rows = F.shape[0]
+    cols = F.shape[1]
+    dFdy = np.zeros((rows,cols))
+    for j in range(1,cols-1):
+        for i in range(rows):
+            dFdy[i][j] = 0.5*(F[i][j+1] - F[i][j-1])
+    return dFdy
+
+@njit
+def curl2D3V_mid(Fx,Fy,Fz):
+    curlx =  dFdy_mid(Fz)
+    curly = -dFdx_mid(Fz)
+    curlz =  dFdx_mid(Fy) - dFdy_mid(Fx)
+    return curlx, curly, curlz
+
+@njit
+def curl2D3V_back(Fx,Fy,Fz):
+    curlx =  dFdy_back(Fz)
+    curly = -dFdx_back(Fz)
+    curlz =  dFdx_back(Fy) - dFdy_back(Fx)
+    return curlx, curly, curlz        

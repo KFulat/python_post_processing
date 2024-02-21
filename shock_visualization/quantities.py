@@ -8,7 +8,7 @@ from scipy.ndimage import gaussian_filter, uniform_filter
 from visualization_package.plot import Plot1D, Plot2D
 from shock_visualization.tools import (
     load_movHR, load_ekin, field_log_new, load_phase, load_Npx,
-    load_mom_distr, spatial_ft,
+    load_mom_distr, spatial_ft, curl2D3V_mid,
 )
 from shock_visualization.constants import RES, LSI, RES_PHASE, MMX, MMY, C
 
@@ -288,6 +288,31 @@ class CurrentTotal(Field):
         data = gaussian_filter(data, sigma=self.filter_level)
         self.data = data
 
+class CurlOfField(Field):
+    def __init__(
+            self, data_norm_const, filter_level,
+            data_extract_const, field_x, field_y, field_z,
+            log=False, norm=False, extract=False
+    ):
+        super().__init__(
+            "", "", data_norm_const, filter_level,
+            data_extract_const, log, norm, extract
+        )
+        self.field_x = field_x
+        self.field_y = field_y
+        self.field_z = field_z
+
+    def data_load(self, nstep):
+        self.field_x.data_load(nstep)
+        self.field_y.data_load(nstep)
+        self.field_z.data_load(nstep)
+        curl_x, curl_y, curl_z = curl2D3V_mid(
+            self.field_x.data, self.field_y.data, self.field_z.data
+        )
+        curl = np.sqrt( curl_x**2 + curl_y**2 + curl_z**2 )
+        curl = gaussian_filter(curl, sigma=self.filter_level)
+        self.data = curl
+
 class Phase(Density):
     def __init__(self, data_path, data_name, data_norm_const, filter_level, log=False, norm=False):
         super().__init__(data_path, data_name, data_norm_const, filter_level, log, norm)
@@ -325,7 +350,7 @@ class Momentum(Density):
 class Fourier(QuantityBase):
     def __init__(
             self, quantity, data_name, data_norm_const, filter_level,
-            data_extract_const, uniform_filter, log=False, norm=True,
+            data_extract_const, uniform_filter, log=True, norm=True,
             extract=True
     ):
         super().__init__(
@@ -352,19 +377,23 @@ class Fourier(QuantityBase):
                                             self.filter_level)
             self.data -= data_filtered
         ft, ticks, kx, ky = spatial_ft(self.data, 5, normalize=True,
-                                       hanning=False, log=True)
+                                       hanning=False, log=False)
         
-        # print(np.sum(self.data**2)/self.data.size)
-        # print(np.sum(ft))
+        print(f"Mean from data: {np.sum(self.data**2)/self.data.size}")
+        print(f"Sum from FT: {np.sum(ft)}")
         # chose specific region of the tranform
-        n = ft.shape[0]
-        m = ft.shape[1]
-        ft = 2.0 * ft[:, m//2+1:] # multiplied by two to maintain norm
+        # n = ft.shape[0]
+        # m = ft.shape[1]
+
+        # ft = 2.0 * ft[:, m//2+1:] # multiplied by two to maintain norm
+        # ft = ft[n//2+1, :] + np.flipud(ft[:n//2-1,:])
         self.data_ft = ft
-        kx_abs = kx[kx>0.0]
-        ticks[0] = np.min(kx_abs)
+        # kx_abs = kx[kx>0.0]
+        # ky_abs = ky[ky>0.0]
+        # ticks[0] = np.min(kx_abs)
+        # ticks[2] = np.min(ky_abs)
         self.ticks_ft = ticks
-        self.kx = kx_abs
+        self.kx = kx
         self.ky = ky
         if self.plot_params_ft.limits == [(None, None), (None, None)]:
             self.plot_params_ft.limits[0] = (self.ticks_ft[0], self.ticks_ft[1])
