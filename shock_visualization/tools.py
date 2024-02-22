@@ -444,4 +444,12 @@ def curl2D3V_back(Fx,Fy,Fz):
     curlx =  dFdy_back(Fz)
     curly = -dFdx_back(Fz)
     curlz =  dFdx_back(Fy) - dFdy_back(Fx)
-    return curlx, curly, curlz        
+    return curlx, curly, curlz
+
+@njit
+def div2D3V_back(Fx,Fy,Fz):
+    divx = dFdx_back(Fx)
+    divy = dFdy_back(Fy)
+    divz = 0
+    div = divx + divy + divz
+    return div   
