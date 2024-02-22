@@ -4,11 +4,12 @@ from dataclasses import dataclass
 from matplotlib.colors import Colormap
 from xmlrpc.client import boolean
 from scipy.ndimage import gaussian_filter, uniform_filter
+from copy import deepcopy
 
 from visualization_package.plot import Plot1D, Plot2D
 from shock_visualization.tools import (
     load_movHR, load_ekin, field_log_new, load_phase, load_Npx,
-    load_mom_distr, spatial_ft, curl2D3V_mid,
+    load_mom_distr, spatial_ft, curl2D3V_mid, div2D3V_back
 )
 from shock_visualization.constants import RES, LSI, RES_PHASE, MMX, MMY, C
 
@@ -313,6 +314,61 @@ class CurlOfField(Field):
         curl = gaussian_filter(curl, sigma=self.filter_level)
         self.data = curl
 
+class Magnitude(Field):
+    def __init__(
+            self, data_norm_const, filter_level,
+            data_extract_const, vx, vy, vz,
+            log=False, norm=False, extract=False
+    ):
+        super().__init__(
+            "", "", data_norm_const, filter_level,
+            data_extract_const, log, norm, extract
+        )
+        self.vx = vx
+        self.vy = vy
+        self.vz = vz
+
+    def data_load(self, nstep):
+        self.vx.data_load(nstep)
+        self.vy.data_load(nstep)
+        self.vz.data_load(nstep)
+        self.vx.data_extract()
+        self.vy.data_extract()
+        self.vz.data_extract()
+        self.vx.data_normalize()
+        self.vy.data_normalize()
+        self.vz.data_normalize()
+        # v = np.sqrt( 
+        #     self.vx.data**2 + self.vy.data**2 + self.vz.data**2
+        # )
+        v = self.vx.data
+        v = gaussian_filter(v, sigma=self.filter_level)
+        self.data = v
+
+class DivergenceOfField(Field):
+    def __init__(
+            self, data_norm_const, filter_level,
+            data_extract_const, field_x, field_y, field_z,
+            log=False, norm=False, extract=False
+    ):
+        super().__init__(
+            "", "", data_norm_const, filter_level,
+            data_extract_const, log, norm, extract
+        )
+        self.field_x = field_x
+        self.field_y = field_y
+        self.field_z = field_z
+
+    def data_load(self, nstep):
+        self.field_x.data_load(nstep)
+        self.field_y.data_load(nstep)
+        self.field_z.data_load(nstep)
+        div = div2D3V_back(
+            self.field_x.data, self.field_y.data, self.field_z.data
+        )
+        div = gaussian_filter(div, sigma=self.filter_level)
+        self.data = div
+
 class Phase(Density):
     def __init__(self, data_path, data_name, data_norm_const, filter_level, log=False, norm=False):
         super().__init__(data_path, data_name, data_norm_const, filter_level, log, norm)
@@ -360,7 +416,11 @@ class Fourier(QuantityBase):
         self.data_extract_const = data_extract_const
         self.extract = extract
         self.plot_params_ft = None
+        self.plot_params_ft1d = None
         self.uniform_filter = uniform_filter
+        self.xpoints = []
+        self.power_spectrum = []
+        self.plots1D = []
 
     def data_load(self, nstep, x1,x2,y1,y2):
         self.quantity.data_load(nstep)
@@ -457,3 +517,23 @@ class Fourier(QuantityBase):
             minor_loc=self.plot_params_ft.minor_loc,
         )
         self.plot_ft = plot
+
+    def add_fourier1d_plot(self, loc):
+        for i in range(3):
+            plot_params_ft1d = deepcopy(self.plot_params_ft1d)
+            plot = Plot1D(
+                self.power_spectrum[i],
+                self.xpoints[i],
+                loc=loc[i],
+                plot_names=plot_params_ft1d.plot_name,
+                rowspan=1,
+                colspan=plot_params_ft1d.colspan,
+                labels=plot_params_ft1d.labels,
+                lims=plot_params_ft1d.limits,
+                hide_xlabels=plot_params_ft1d.hide_xlabels,
+                legend=plot_params_ft1d.legend,
+                legend_position=plot_params_ft1d.legend_position,
+                major_loc=plot_params_ft1d.major_loc,
+                minor_loc=plot_params_ft1d.minor_loc,
+            )
+            self.plots1D.append(plot)
