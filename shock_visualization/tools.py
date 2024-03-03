@@ -3,6 +3,7 @@ from visualization_package.load import load_data_from_h5file
 
 import sys
 import numpy as np
+import h5py
 from numba import njit
 from argparse import ArgumentParser
 from scipy.optimize import curve_fit
@@ -125,6 +126,10 @@ def parse_arguments_fourier():
 
     return args
 
+def save_data_to_h5file(file_name, data, dataset_name):
+    with h5py.File(file_name, "a") as f:
+        f.create_dataset(dataset_name, data=data)
+
 def func_linear(x, a, b):
     return a*x+b
 
@@ -134,6 +139,7 @@ def linear_fit(x, y):
     perr = np.sqrt(np.diag(pcov))
     a = popt[0]
     b = popt[1]
+    print(f"Fitted parameters: a={a}, b={b}")
     std_a = perr[0]
     x_mean = np.mean(x)
     sum = np.sum((x-x_mean)**2)
