@@ -141,34 +141,49 @@ class Spectrum(QuantityBase):
         self.plot = plot
 
 
-class DensityProfile(QuantityBase):
-    def __init__(self, data_path, data_name, data_norm_const, filter_level, log=False, norm=False):
-        super().__init__(data_path, data_name, data_norm_const, filter_level, log, norm)
+class ProfileX(QuantityBase):
+    def __init__(
+            self, data_path, data_name, data_norm_const, filter_level,
+            quantities,
+            log=False, norm=False, abs=True,
+        ):
+        super().__init__(
+            data_path, data_name, data_norm_const,
+            filter_level, log, norm
+        )
         self.data = []
+        self.quantities = quantities
         self.xpoints = None
+        self.abs = abs
     
     def data_load(self, nstep):
         self.data = []
-        for i, dname in enumerate(self.data_name):
-            data = load_movHR(nstep, dname, self.data_path)
-            data = data.T[2:-2, 2:-2]
-            Npx = load_Npx(nstep, self.data_path)
-            temp = np.zeros((MMY, MMX*int(Npx)))
-            temp[:data.shape[0], :data.shape[1]] = data
-            data = temp
+        for i, quantity in enumerate(self.quantities):
+            quantity.data_load(nstep)
+            if self.abs: quantity.data = np.abs(quantity.data)
+            data = np.average(quantity.data, axis=0)
             data = gaussian_filter(data, sigma=self.filter_level)
-            data = np.average(data, axis=0)
             self.data.append(data)
-            if i == 0:
-                xmax = data.shape[0] * RES
-                xpoints = np.linspace(0, xmax/LSI, num=data.shape[0])
-                self.xpoints = xpoints
+        data_size = min([arr.size for arr in self.data])
+        self.data = [arr[:data_size] for arr in self.data]
+        xmax = data_size * RES
+        self.xpoints = np.linspace(
+            0, xmax/LSI, num=data_size
+        )
 
     def data_logscale(self):
         if self.log: self.data = [np.ma.log10(x) for x in self.data]
 
     def data_normalize(self):
         if self.norm: self.data = [x / self.data_norm_const for x in self.data]
+
+    def data_extract(self):
+        pass
+
+    def set_ticks(self):
+        self.ticks = [self.xpoints[0], self.xpoints[-1]]
+        if self.plot_params.limits[0] == (None, None):
+            self.plot_params.limits[0] = (self.ticks[0], self.ticks[1])
 
     def add_plot(self, loc):
         plot = Plot1D(
@@ -338,10 +353,9 @@ class Magnitude(Field):
         self.vx.data_normalize()
         self.vy.data_normalize()
         self.vz.data_normalize()
-        # v = np.sqrt( 
-        #     self.vx.data**2 + self.vy.data**2 + self.vz.data**2
-        # )
-        v = self.vx.data
+        v = np.sqrt( 
+            self.vx.data**2 + self.vy.data**2 + self.vz.data**2
+        )
         v = gaussian_filter(v, sigma=self.filter_level)
         self.data = v
 
